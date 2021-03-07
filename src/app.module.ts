@@ -9,7 +9,11 @@ import { UsrModule } from './usr/usr.module';
 
 @Module({
   imports: [
-    // MongooseModule.forRoot('mongodb://locahost:27017'),
+    MongooseModule.forRoot('mongodb://localhost:27017/wepo', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: true,
+    }),
     PoModule,
     UsrModule
   ],

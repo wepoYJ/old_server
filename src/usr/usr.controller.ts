@@ -1,9 +1,12 @@
 import { Controller, Post } from '@nestjs/common';
 import { AppService } from 'src/app.service';
-
+import { UsrService } from './usr.service';
 @Controller('usr')
 export class UsrController {
-  constructor(private readonly appService: AppService) { }
+  constructor(
+    private readonly appService: AppService,
+  ) { }
+
   @Post('reg')
   reg() {
     let resp = this.appService.getResponse(0, {
