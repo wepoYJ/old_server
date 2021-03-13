@@ -3,8 +3,14 @@ import { Document } from 'mongoose';
 
 export type UsrDocument = Usr & Document;
 
+export interface IUsr {
+  email: string,
+  un: string,
+  pwd: string,
+}
+
 @Schema()
-export class Usr extends Document {
+export class Usr extends Document implements IUsr {
   @Prop({
     required: true
   })
@@ -13,13 +19,13 @@ export class Usr extends Document {
   @Prop({
     required: true
   })
-  pwd: number;
+  pwd: string;
 
   @Prop({
     required: true,
     unique: true,
   })
-  id: number;
+  email: string;
 }
 
 export const UsrSchema = SchemaFactory.createForClass(Usr);

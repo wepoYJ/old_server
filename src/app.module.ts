@@ -6,18 +6,38 @@ import { PoModule } from './po/po.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsrController } from './usr/usr.controller';
 import { UsrModule } from './usr/usr.module';
+import { MailService } from './mail/mail.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { DBConf, EmailConf } from './constants/constants';
+import { RedisModule } from 'nestjs-redis';
+import { CacheService } from './cache/cache.service';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/wepo', {
+    PoModule,
+    UsrModule,
+    // 数据库
+    MongooseModule.forRoot(`mongodb://${DBConf.mongodb}`, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: true,
     }),
-    PoModule,
-    UsrModule
+    // redis
+    RedisModule.register({
+      host: DBConf.redis.host,
+      port: DBConf.redis.port,
+    }),
+    // 邮箱服务
+    MailerModule.forRoot({
+      transport: {
+        host: `smtps://${EmailConf.host}:${EmailConf.pwd}@smtp.domain.com`,
+      },
+      defaults: {
+        from:`"WePo" <${EmailConf.host}>`,
+      },
+    })
   ],
   controllers: [AppController, PoController, UsrController],
-  providers: [AppService],
+  providers: [AppService, MailService, CacheService],
 })
 export class AppModule {}
