@@ -1,17 +1,18 @@
-import { MailerService } from '@nestjs-modules/mailer';
-import { Body, Controller, Post } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { stringify } from 'node:querystring';
-import { AppService } from 'src/app.service';
+import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
 import { Base } from 'src/base/base';
 import { CacheService } from 'src/cache/cache.service';
 import { MailService } from 'src/mail/mail.service';
-import { Usr, UsrDocument } from './schemas/usr.schema';
 import { UsrService } from './usr.service';
+import { Util } from 'src/utils/util';
+import { RegDto } from './dto/reg.dto';
+import { makeSalt, encryptPassword } from 'src/utils/cryptogram';
+import { Cache } from 'src/base/cache';
+import * as crypto from 'crypto';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
+import { SendVerifyDto } from './dto/send.verify.dto';
 
-const codeStr = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
+@ApiTags('usr')
 @Controller('usr')
 export class UsrController {
   constructor(
@@ -20,73 +21,81 @@ export class UsrController {
     private readonly MailService: MailService,
   ) { }
 
+  @ApiResponse({
+    status: -1,
+    description: '验证码错误'
+  })
   @Post('reg')
   async reg(
-    @Body('name') un: string,
-    @Body('password') pwd: string,
-    @Body('email') email: string,
-    @Body('code') code: string,
+    @Body(new ValidationPipe()) regDto: RegDto
   ) {
-    let cacheCode = await this.CacheService.get(`${email}:code`);
+    let { email, code, name: un, password: pwd } = regDto
+    let key = Cache.getValidateCodeKey(email)
+    let cacheCode = await this.CacheService.get(key);
     if (!cacheCode || cacheCode != code) {
-      return Base.createResponse(-1, null, '验证码错误');
+      return Base.nullResponse(-1, '验证码错误');
     }
+    // 密码加密
+    const salt = makeSalt();
+    pwd = encryptPassword(pwd, salt);
     let doc = await this.UsrService.insert({
-      un, pwd, email
+      un, pwd, email, salt
     })
-    let resp = Base.createResponse(0, doc);
-    return resp
+    return Base.nullResponse(0, '注册成功')
   }
 
+  @ApiResponse({
+    status: -1,
+    description: '用户不存在',
+  })
+  @ApiResponse({
+    status: -2,
+    description: '用户名或密码错误',
+  })
   @Post('login')
-  login(
-    @Body('email') email: string,
-    @Body('password') pwd: string,
+  async login(
+    @Body(new ValidationPipe()) loginDto: LoginDto,
   ) {
-    this.UsrService.find({ email })
+    let { email, password: pwd } = loginDto
+    let doc = await this.UsrService.find({ email })
+    if (doc === null) {
+      return Base.nullResponse(-1, '用户不存在');
+    }
+    let salt = doc.salt
+    let tmpPwd = encryptPassword(pwd, salt)
+    if (tmpPwd != doc.pwd) {
+      return Base.nullResponse(-2, '用户名或密码错误')
+    }
+    let key = Cache.getTokenKey(email)
+    let token = this.createToken(email, pwd);
+    await this.CacheService.set(key, token);
+    return Base.response(0, { token });
   }
 
+  @ApiResponse({
+    status: -1,
+    description: '发送失败'
+  })
   @Post('sendVerify')
   async sendVerify(
-    @Body('email') email: string,
+    @Body() sendVerifyDto: SendVerifyDto
   ) {
-    let code = this.getCode();
+    let { email } = sendVerifyDto
+    let code = Util.getCode();
     let sec = 300;
     console.log(email, code);
-    await this.CacheService.set(`${email}:code`, code, sec);
-    await this.MailService.sendValidCode(email, code, sec);
-    return Base.createResponse(0);
+    let key = Cache.getValidateCodeKey(email)
+    await this.CacheService.set(key, code, sec);
+    try {
+      await this.MailService.sendValidCode(email, code, sec);
+      return Base.nullResponse(0);
+    } catch (e) {
+      return Base.nullResponse(-1, '发送失败');
+    }
   }
 
-  // 将随机生成的整数下标对应的字母放入div中
-  private getCode() {
-    // 用来生成随机整数
-    function getRandom(n, m) { // param: (Number, Number)
-      n = Number(n);
-      m = Number(m);
-      // 确保 m 始终大于 n
-      if (n > m) {
-          var temp = n;
-          n = m;
-          m = temp;
-      }
-      // 下有详细说明
-      return Math.floor(Math.random()*(m - n) + n);
-    }
-    var str = '';
-    // 验证码有几位就循环几次
-    for (var i = 0;i < 4;i ++) {
-        var ran = getRandom(0, 62);
-        str += codeStr.charAt(ran);
-    }
-    return str;
+  private createToken(email: string, pwd: string) {
+    let timeStamp = Date.now()
+    return crypto.createHmac('md5', email).update(pwd).digest('hex');
   }
-
-  // @Post('verifyEmail')
-  // verifyEmail(
-  //   @Body('email') email: string,
-  //   @Body('code') code: string,
-  // ) {
-  //   this.CacheService.set(`${email}:code`, )
-  // }
 }

@@ -30,14 +30,19 @@ import { CacheService } from './cache/cache.service';
     // 邮箱服务
     MailerModule.forRoot({
       transport: {
-        host: `smtps://${EmailConf.host}:${EmailConf.pwd}@smtp.domain.com`,
+        host: "smtp.163.com",
+        port: 465,
+        auth: {
+          user: EmailConf.host,
+          pass: EmailConf.SMTP_Auth,
+        }
       },
       defaults: {
-        from:`"WePo" <${EmailConf.host}>`,
-      },
-    })
+        from: `"WePo official" <${EmailConf.host}>`
+      }
+    }),
   ],
-  controllers: [AppController, PoController, UsrController],
+controllers: [AppController, PoController, UsrController],
   providers: [AppService, MailService, CacheService],
 })
-export class AppModule {}
+export class AppModule { }

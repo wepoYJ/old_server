@@ -4,9 +4,10 @@ import { Document } from 'mongoose';
 export type UsrDocument = Usr & Document;
 
 export interface IUsr {
-  email: string,
-  un: string,
-  pwd: string,
+  email: string
+  un: string
+  pwd: string
+  salt: string
 }
 
 @Schema()
@@ -14,18 +15,23 @@ export class Usr extends Document implements IUsr {
   @Prop({
     required: true
   })
-  un: string;
+  un: string
 
   @Prop({
     required: true
   })
-  pwd: string;
+  pwd: string
 
   @Prop({
     required: true,
-    unique: true,
+    unique: true, 
   })
-  email: string;
+  email: string
+
+  @Prop({
+    required: true
+  })
+  salt: string
 }
 
 export const UsrSchema = SchemaFactory.createForClass(Usr);

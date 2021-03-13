@@ -3,3 +3,7 @@ export interface IResponse<T> {
   data: T
   msg?: string
 }
+export interface INullResponse {
+  code: number
+  msg?: string
+}

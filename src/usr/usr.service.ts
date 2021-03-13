@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsrDocument, Usr, IUsr } from './schemas/usr.schema';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Query } from 'mongoose';
 
 @Injectable()
 export class UsrService {
