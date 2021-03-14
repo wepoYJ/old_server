@@ -1,7 +1,9 @@
 import { Injectable, Post } from '@nestjs/common';
 import { IResponse } from './interface/IResponse';
 import child_process from "child_process"
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('默认')
 @Injectable()
 export class AppService {
   getHello(): string {
