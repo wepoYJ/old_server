@@ -33,6 +33,12 @@ export class UsrController {
     @Body(new ValidationPipe()) regDto: RegDto
   ) {
     let { email, code, name: un, password: pwd } = regDto
+    // 判断用户是否存在
+    let user = await this.UsrService.find({ email })
+    if (user) {
+      return Base.nullResponse(-2, '用户已存在')
+    }
+    // 验证码
     let key = Cache.getValidateCodeKey(email)
     let cacheCode = await this.CacheService.get(key);
     if (!cacheCode || cacheCode != code) {
