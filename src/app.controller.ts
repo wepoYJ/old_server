@@ -13,7 +13,7 @@ export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @ApiOperation({
-    summary: '首页',
+    summary: 'No Access To Visit',
   })
   @Get()
   getHello(): string {
