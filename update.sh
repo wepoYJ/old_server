@@ -2,14 +2,14 @@
 
 cd ~/wepo-server
 
-echo "git pull"
+echo "> git pull gitee master"
 git pull gitee master
 
-echo "yarn install"
+echo "> yarn"
 yarn
 
-echo "build"
+echo "> yarn build"
 yarn build
 
-echo "pm2 reload"
+echo "> pm2 reload wepo-server"
 pm2 reload wepo-server
