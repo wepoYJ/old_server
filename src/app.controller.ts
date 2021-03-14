@@ -1,26 +1,39 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-import child_process from "child_process"
+import { exec } from "child_process"
+import { promisify } from "util"
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Base } from './base/base';
+
+const execAsync = promisify(exec)
 
 @ApiTags('默认')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) { }
 
   @Get()
   getHello(): string {
     return this.appService.getHello();
   }
-  
+
   @ApiOperation({
     summary: '自动脚本',
     description: '拉取最新代码 > 更新依赖 > 构建 > 重启PM2'
   })
   @Post('pull-and-reload')
-  update() {
-    child_process.exec('./update.sh').on('close', (code, sign) => {
-      console.log('[hooks update]',code, sign)
-    })
+  async update() {
+    let now = Date.now(), respMsg: any
+    await execAsync('update.sh')
+      .catch(e => {
+        console.error(e)
+      })
+      .finally(() => {
+        let time = (Date.now() - now) / 1000
+        let msg = `自动部署完毕，耗时：${time}`
+        respMsg = msg
+        console.log(msg)
+      })
+    return Base.nullResponse(0, respMsg)
   }
 }
