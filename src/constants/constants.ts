@@ -11,6 +11,6 @@ export const DBConf = {
   redis: {
     port: 6379,
     host: 'localhost',
-    password: '',
+    password: 'Ivent.fun1',
   }
 }
