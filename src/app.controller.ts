@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Response, BadRequestException } from '@nestjs/common';
 import { AppService } from './app.service';
 import { exec } from "child_process"
 import { promisify } from "util"
@@ -12,9 +12,12 @@ const execAsync = promisify(exec)
 export class AppController {
   constructor(private readonly appService: AppService) { }
 
+  @ApiOperation({
+    summary: '首页',
+  })
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    throw new BadRequestException('No Access To Visit.')
   }
 
   @ApiOperation({
