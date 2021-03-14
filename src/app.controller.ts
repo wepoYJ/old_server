@@ -27,7 +27,7 @@ export class AppController {
   @Post('pull-and-reload')
   async update() {
     let now = Date.now(), respMsg: any
-    await execAsync('update.sh')
+    await execAsync('./update.sh')
       .catch(e => {
         console.error(e)
       })
