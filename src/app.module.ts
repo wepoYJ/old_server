@@ -26,6 +26,7 @@ import { CacheService } from './cache/cache.service';
     RedisModule.register({
       host: DBConf.redis.host,
       port: DBConf.redis.port,
+      password: DBConf.redis.password,
     }),
     // 邮箱服务
     MailerModule.forRoot({
