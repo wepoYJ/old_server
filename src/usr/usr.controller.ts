@@ -25,6 +25,10 @@ export class UsrController {
     status: -1,
     description: '验证码错误'
   })
+  @ApiResponse({
+    status: -2,
+    description: '用户已存在'
+  })
   @ApiOperation({
     summary: '注册用户',
   })
