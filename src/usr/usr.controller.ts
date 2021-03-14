@@ -8,7 +8,7 @@ import { RegDto } from './dto/reg.dto';
 import { makeSalt, encryptPassword } from 'src/utils/cryptogram';
 import { Cache } from 'src/base/cache';
 import * as crypto from 'crypto';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { SendVerifyDto } from './dto/send.verify.dto';
 
@@ -24,6 +24,9 @@ export class UsrController {
   @ApiResponse({
     status: -1,
     description: '验证码错误'
+  })
+  @ApiOperation({
+    summary: '注册用户',
   })
   @Post('reg')
   async reg(
@@ -52,6 +55,9 @@ export class UsrController {
     status: -2,
     description: '用户名或密码错误',
   })
+  @ApiOperation({
+    summary: '登录',
+  })
   @Post('login')
   async login(
     @Body(new ValidationPipe()) loginDto: LoginDto,
@@ -76,6 +82,9 @@ export class UsrController {
     status: -1,
     description: '发送失败'
   })
+  @ApiOperation({
+    summary: '发送验证码',
+  })
   @Post('sendVerify')
   async sendVerify(
     @Body() sendVerifyDto: SendVerifyDto
@@ -94,8 +103,8 @@ export class UsrController {
     }
   }
 
-  private createToken(email: string, pwd: string) {
+  private createToken(arg1: string, arg2: string) {
     let timeStamp = Date.now()
-    return crypto.createHmac('md5', email).update(pwd).digest('hex');
+    return crypto.createHmac('md5', arg1 + timeStamp).update(arg2).digest('hex');
   }
 }
