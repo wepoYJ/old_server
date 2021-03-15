@@ -30,7 +30,7 @@ export class UsrController {
     description: '用户已存在'
   })
   @ApiOperation({
-    summary: '注册用户',
+    summary: '注册',
   })
   @Post('reg')
   async reg(

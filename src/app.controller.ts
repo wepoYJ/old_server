@@ -37,7 +37,6 @@ export class AppController {
         let msg = `自动部署完毕，耗时：${time}`
         console.log(msg)
       })
-    
-      return Base.nullResponse(0, '服务器构建中...')
+    return Base.nullResponse(0, '服务器构建中...')
   }
 }
