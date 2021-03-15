@@ -26,17 +26,18 @@ export class AppController {
   })
   @Post('pull-and-reload')
   async update() {
-    let now = Date.now(), respMsg: any
-    await execAsync('./update.sh')
+    console.log(`[pull-and-reload] ${new Date().toLocaleString()}`)
+    let now = Date.now()
+    execAsync('./update.sh')
       .catch(e => {
         console.error(e)
       })
       .finally(() => {
         let time = (Date.now() - now) / 1000
         let msg = `自动部署完毕，耗时：${time}`
-        respMsg = msg
         console.log(msg)
       })
-    return Base.nullResponse(0, respMsg)
+    
+      return Base.nullResponse(0, '服务器构建中...')
   }
 }
